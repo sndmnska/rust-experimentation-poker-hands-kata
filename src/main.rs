@@ -10,12 +10,30 @@ struct Hand {
     cards: Vec<Card>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Eq, PartialEq)]
 
 struct Card {
     suit: Suit,
     rank: Rank,
 }
+
+// impl PartialEq for Card {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.rank == other.rank
+//     }
+// }
+
+// impl Ord for Card {
+//     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+//         self.rank.cmp(&other.rank)
+//     }
+// }
+
+// impl PartialOrd for Card {
+//     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+//         Some(self.cmp(other))
+//     }
+// }
 
 fn parse_card(s: &str) -> Card {
     let mut chars = s.chars();
@@ -64,6 +82,7 @@ fn parse_hand(s: &str) -> Hand {
 
     let mut cards = s.split_whitespace().map(parse_card).collect::<Vec<_>>();
     cards.sort_by_key(|card| card.rank);
+    cards.reverse();
 
     // let cards = vec![
     //     parse_card(&s[0..2]),
@@ -117,7 +136,16 @@ enum Outcome {
 }
 
 fn compare_hands(hand1: &Hand, hand2: &Hand) -> Outcome {
-    Outcome::Player2
+    let ranks1 = hand1.cards.iter().map(|card| card.rank).collect::<Vec<_>>();
+    let ranks2 = hand2.cards.iter().map(|card| card.rank).collect::<Vec<_>>();
+
+    if ranks1 > ranks2 {
+        Outcome::Player1
+    } else if ranks1 < ranks2 {
+        Outcome::Player2
+    } else {
+        Outcome::Draw
+    }
 }
 
 #[cfg(test)]
@@ -135,16 +163,26 @@ mod tests {
         assert_eq!(compare_hands(&hand1, &hand2), Outcome::Player2);
     }
 
-    // #[test]
-    // fn test_compare_poker_hands2() {
-    //     // Example hand:
-    //     //
-    //     // 2H 3D 5S 9C KD   2C 3H 4S 8C AH
-    //     // Player 2 wins.
-    //     let hand1 = parse_hand("2C 3H 4S 8C AH");
-    //     let hand2 = parse_hand("2H 3D 5S 9C KD");
-    //     assert_eq!(compare_hands(&hand1, &hand2), Outcome::Player1);
-    // }
+    #[test]
+    fn test_compare_poker_hands2() {
+        // Example hand:
+        //
+        // 2H 3D 5S 9C KD   2C 3H 4S 8C AH
+        // Player 2 wins.
+        let hand1 = parse_hand("2C 3H 4S 8C AH");
+        let hand2 = parse_hand("2H 3D 5S 9C KD");
+        assert_eq!(compare_hands(&hand1, &hand2), Outcome::Player1);
+    }
+
+    fn test_compare_poker_hands_draw() {
+        // Example hand:
+        //
+        // 2H 3D 5S 9C KD   2C 3H 4S 8C AH
+        // Player 2 wins.
+        let hand1 = parse_hand("2C 3H 4S 8C AH");
+        let hand2 = parse_hand("2H 3C 4H 8S AC");
+        assert_eq!(compare_hands(&hand1, &hand2), Outcome::Draw);
+    }
 
     #[test]
     fn test_parse_card_() {
@@ -166,11 +204,11 @@ mod tests {
         assert_eq!(
             hand.cards,
             [
-                parse_card("2H"),
-                parse_card("3D"),
-                parse_card("5S"),
+                parse_card("KD"),
                 parse_card("9C"),
-                parse_card("KD")
+                parse_card("5S"),
+                parse_card("3D"),
+                parse_card("2H")
             ]
         );
     }
@@ -181,11 +219,11 @@ mod tests {
         assert_eq!(
             hand.cards,
             [
-                parse_card("2H"),
-                parse_card("3D"),
-                parse_card("5S"),
+                parse_card("KD"),
                 parse_card("9C"),
-                parse_card("KD")
+                parse_card("5S"),
+                parse_card("3D"),
+                parse_card("2H")
             ]
         );
     }
