@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::cmp::Ordering;
+
 // mod structenum;
 
 fn main() {
@@ -135,17 +137,26 @@ enum Outcome {
     Draw,
 }
 
+// TODO Maybe replace outcome with Ordering?
+
 fn compare_hands(hand1: &Hand, hand2: &Hand) -> Outcome {
     let ranks1 = hand1.cards.iter().map(|card| card.rank).collect::<Vec<_>>();
     let ranks2 = hand2.cards.iter().map(|card| card.rank).collect::<Vec<_>>();
 
-    if ranks1 > ranks2 {
-        Outcome::Player1
-    } else if ranks1 < ranks2 {
-        Outcome::Player2
-    } else {
-        Outcome::Draw
+    match ranks1.cmp(&ranks2) {
+        Ordering::Greater => Outcome::Player1,
+        Ordering::Less => Outcome::Player2,
+        Ordering::Equal => Outcome::Draw,
     }
+
+    // What the above does:
+    // if ranks1 > ranks2 {
+    //     Outcome::Player1
+    // } else if ranks1 < ranks2 {
+    //     Outcome::Player2
+    // } else {
+    //     Outcome::Draw
+    // }
 }
 
 #[cfg(test)]
